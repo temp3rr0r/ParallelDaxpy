@@ -1,8 +1,8 @@
-#include "Daxpy.h"
 #include <thread>
 #include <vector>
 #include <pthread.h>
 #include "Settings.h"
+#include "Daxpy.h"
 
 using namespace std;
 

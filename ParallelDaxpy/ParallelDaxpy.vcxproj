@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Daxpy.h" />
+    <ClInclude Include="Makefile" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
