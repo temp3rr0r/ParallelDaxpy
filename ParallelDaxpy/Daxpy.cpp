@@ -6,25 +6,16 @@ using namespace std;
 
 // Serial Daxpy on a specific range, y[n] <- a * x[n] + y[n]
 void daxpy(size_t from, size_t to, double a, const double* x, double* y) {
-
-	for (size_t i = from; i < to; i++) {
+	for (size_t i = from; i < to; i++)
 		y[i] = a * x[i] + y[i];
-	}
-}
-
-void pthread() {
-	
-
 }
 
 // Runs daxpy using the given number of threads. Splits the 
 // work equally. Remarks: Leaves left over work. Leftover work size = n % nt
-void daxpy_parallel_exact_work(size_t n, double a, const double* x, double* y, size_t nt) {
-	
+void daxpy_parallel_exact_work(size_t n, double a, const double* x, double* y, size_t nt) {	
 	size_t work_size = n / nt; // Calculate the work size for each thread
 	
 	vector<thread> threads(nt); // Allocate a vector of threads
-
 	// Assign work to each thread and Start them
 	for (int i = 0; i < nt; i++) {
 		size_t from = i * work_size; // Starting work index
@@ -32,9 +23,8 @@ void daxpy_parallel_exact_work(size_t n, double a, const double* x, double* y, s
 		threads[i] = thread(daxpy, from, to, a, x, y); // Run the thread
 	}
 
-	for (thread& current_thread : threads) { // Wait for all threads to finish
+	for (thread& current_thread : threads) // Wait for all threads to finish
 		current_thread.join();
-	}
 }
 
 // DAXPY constant * a vector plus a vector.
