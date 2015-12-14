@@ -6,8 +6,15 @@ using namespace std;
 
 // Serial Daxpy on a specific range, y[n] <- a * x[n] + y[n]
 void daxpy(size_t from, size_t to, double a, const double* x, double* y) {
-	for (size_t i = from; i < to; i++)
+
+	for (size_t i = from; i < to; i++) {
 		y[i] = a * x[i] + y[i];
+	}
+}
+
+void pthread() {
+	
+
 }
 
 // Runs daxpy using the given number of threads. Splits the 
