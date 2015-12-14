@@ -2,6 +2,9 @@
 #include <thread>
 #include <vector>
 #include <pthread.h>
+#include <ostream>
+#include <iostream>
+#include "Settings.h"
 
 using namespace std;
 
@@ -65,7 +68,7 @@ struct thread_data {
 	double* y;
 };
 
-// Serial Daxpy on a specific range, y[n] <- a * x[n] + y[n]
+// Serial Daxpy for Pthreads on a specific range, y[n] <- a * x[n] + y[n]
 void *daxpy_pthreads(void* data_in) {
 
 	thread_data *data;
@@ -79,28 +82,33 @@ void *daxpy_pthreads(void* data_in) {
 
 	for (size_t i = in_from; i < in_to; i++)
 		in_y[i] = in_a * in_x[i] + in_y[i];
+	
+	return nullptr;
 }
 
 void daxpy_parallel_exact_work_pthreads(size_t n, double a, const double* x, double* y, size_t nt) {
 		
 	size_t work_size = n / nt; // Calculate the work size for each thread
 
-	pthread_t p_threads[3]; // TODO: change it
-
-	struct thread_data td;
-	td.a = a;
-	td.x = x;
-	td.y = y;
+	pthread_t p_threads[DEFAULT_NUMBER_OF_THREADS]; // TODO: change it
 
 	for (int i = 0; i < nt; i++) {
+		struct thread_data td;
+		td.a = a;
+		td.x = x;
+		td.y = y;
 		size_t from = i * work_size; // Starting work index
 		size_t to = from + work_size; // Ending work index
 		td.from = from;
 		td.to = to;
 		pthread_create(&p_threads[i], nullptr, daxpy_pthreads, &td); // Run the thread
 	}
+
+	void* status;
+	for (int i = 0; i < nt; i++)
+		pthread_join(p_threads[i], &status);
 	
-	pthread_exit(nullptr);
+	//pthread_exit(nullptr);
 }
 
 void daxpy_parallel_pthreads(size_t n, double a, const double* x, double* y, size_t nt) {
