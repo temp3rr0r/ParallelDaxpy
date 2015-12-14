@@ -2,8 +2,6 @@
 #include <thread>
 #include <vector>
 #include <pthread.h>
-#include <ostream>
-#include <iostream>
 #include "Settings.h"
 
 using namespace std;
@@ -21,7 +19,7 @@ void daxpy_parallel_exact_work(size_t n, double a, const double* x, double* y, s
 	
 	vector<thread> threads(nt); // Allocate a vector of threads
 	// Assign work to each thread and Start them
-	for (int i = 0; i < nt; i++) {
+	for (size_t i = 0; i < nt; i++) {
 		size_t from = i * work_size; // Starting work index
 		size_t to = from + work_size; // Ending work index
 		threads[i] = thread(daxpy, from, to, a, x, y); // Run the thread
@@ -87,12 +85,19 @@ void *daxpy_pthreads(void* data_in) {
 }
 
 void daxpy_parallel_exact_work_pthreads(size_t n, double a, const double* x, double* y, size_t nt) {
-		
+	
+	int rc;
+	void* status;
 	size_t work_size = n / nt; // Calculate the work size for each thread
 
-	pthread_t p_threads[DEFAULT_NUMBER_OF_THREADS]; // TODO: change it
+	pthread_t p_threads[DEFAULT_NUMBER_OF_THREADS];
+	pthread_attr_t attribute;
 
-	for (int i = 0; i < nt; i++) {
+	// Initialize and set thread detached attribute
+	pthread_attr_init(&attribute);
+	pthread_attr_setdetachstate(&attribute, PTHREAD_CREATE_JOINABLE);
+
+	for (size_t i = 0; i < nt; i++) {
 		struct thread_data td;
 		td.a = a;
 		td.x = x;
@@ -101,14 +106,24 @@ void daxpy_parallel_exact_work_pthreads(size_t n, double a, const double* x, dou
 		size_t to = from + work_size; // Ending work index
 		td.from = from;
 		td.to = to;
-		pthread_create(&p_threads[i], nullptr, daxpy_pthreads, &td); // Run the thread
+		rc = pthread_create(&p_threads[i], &attribute, daxpy_pthreads, &td); // Run the thread
+		if (rc) {
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+				exit(-1);
+		}
 	}
 
-	void* status;
-	for (int i = 0; i < nt; i++)
-		pthread_join(p_threads[i], &status);
+	// Free attribute and wait for the other threads
+	pthread_attr_destroy(&attribute);
+	for (size_t i = 0; i < nt; i++) {
+		rc = pthread_join(p_threads[i], &status);
+		if (rc) {
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+				exit(-1);
+		}
+	}
 	
-	//pthread_exit(nullptr);
+	//pthread_exit(NULL);
 }
 
 void daxpy_parallel_pthreads(size_t n, double a, const double* x, double* y, size_t nt) {

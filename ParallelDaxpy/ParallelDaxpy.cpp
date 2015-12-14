@@ -29,7 +29,6 @@ void debug_print_vectors(double* x, double* y, size_t n) {
 void debug_print_results(double a, double* x, double* y, size_t n) {
 	for (size_t i = 0; i < n; i++) {
 		cout << "y[" << i << "] = " << a << " * x[" << i << "] + y[" << i << "] = " << y[i] << endl;
-		assert(a * x[i] + (x[i] + DEFAULT_Y_ADDITION) == y[i]);
 	}
 }
 
@@ -47,18 +46,17 @@ int main()
 	size_t n = DEFAULT_VECTOR_SIZE; // Vector size
 	
 	// User Input data
-	a = 1.37;
+	a = 0.123;
 
 	if (n > 0) {
 		// Allocate Data vectors
 		double* x = new double[n];
 		double* y = new double[n];
 
-		if (DEBUG)
+		if (VERBOSE)
 			debug_print_vectors(x, y, n); // Print input vectors
 
 		// Compare running serial, with pthreads and with c++11 threads
-
 		clock_t t1, t2;
 
 		// C++ 11 threads
@@ -82,10 +80,10 @@ int main()
 		t1 = clock();
 		daxpy_parallel_pthreads(n, a, x, y, nt); // Calculate using Pthreads
 		t2 = clock();
-		//assert_results(a, x, y, n);
+		assert_results(a, x, y, n);
 		cout << "PThreads execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
 		
-		if (DEBUG)
+		if (VERBOSE)
 			debug_print_results(a, x, y, n); // Print results
 		
 		// Deallocate arrays
