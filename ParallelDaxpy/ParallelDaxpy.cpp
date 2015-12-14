@@ -1,11 +1,11 @@
 // ParallelDaxpy.cpp : Defines the entry point for the console application.
 //
 
+#include "Settings.h"
+#include "Daxpy.h"
 #include <iostream>
 #include <cassert>
 #include <chrono>
-#include "Settings.h"
-#include "Daxpy.h"
 
 using namespace std;
 using namespace std::chrono;
