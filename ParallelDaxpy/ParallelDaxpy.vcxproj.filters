@@ -21,19 +21,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Daxpy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pthread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sched.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="semaphore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Settings.h">
@@ -41,9 +29,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParallelDaxpy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
