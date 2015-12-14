@@ -13,6 +13,7 @@ using namespace std::chrono;
 // Put data into the vector arrays
 void populate_vector_data(double* x, double* y, size_t n) {
 	for (size_t i = 0; i < n; i++) {
+
 		x[i] = static_cast<double>(i);
 		y[i] = static_cast<double>(i) + DEFAULT_Y_ADDITION;
 	}
