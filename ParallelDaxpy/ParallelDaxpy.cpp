@@ -9,14 +9,14 @@
 static const int DEFAULT_NUMBER_OF_THREADS = 1;
 static const int DEFAULT_VECTOR_SIZE = 1;
 static const double DEFAULT_PARAMETER_A = 1.0;
-static const double DEFAULT_Y_ADDITION = 0.25;
+static const double DEFAULT_Y_ADDITION = 3.25;
 static const bool DEBUG = false;
 
 using namespace std;
 using namespace std::chrono;
 
-// Populate vectors with data
 void populate_vector_data(double* x, double* y, size_t n) {
+	// Put data into vectors
 	for (size_t i = 0; i < n; i++) {
 		x[i] = static_cast<double>(i);
 		y[i] = static_cast<double>(i) + DEFAULT_Y_ADDITION;
@@ -69,14 +69,6 @@ int main()
 
 		clock_t t1, t2;
 
-		// Serial Execution
-		populate_vector_data(x, y, n);
-		t1 = clock();
-		daxpy(0, n, a, x, y); // Calculate using serial execution
-		t2 = clock();
-		assert_results(a, x, y, n);
-		cout << "Serial execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
-		
 		// C++ 11 threads
 		populate_vector_data(x, y, n);
 		t1 = clock();
@@ -84,14 +76,22 @@ int main()
 		t2 = clock();
 		assert_results(a, x, y, n);
 		cout << "C++ 11 execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
-		
+
+		// Serial Execution
+		populate_vector_data(x, y, n);
+		t1 = clock();
+		daxpy(0, n, a, x, y); // Calculate using serial execution
+		t2 = clock();
+		assert_results(a, x, y, n);
+		cout << "Serial execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
+
 		// TODO: Pthreads
 		populate_vector_data(x, y, n);
 		t1 = clock();
-		//daxpy_parallel(n, a, x, y, nt); // Calculate using Pthreads
+		daxpy_parallel(n, a, x, y, nt); // Calculate using Pthreads
 		t2 = clock();
 		assert_results(a, x, y, n);
-		cout << "C++ 11 execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
+		cout << "PThreads execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
 		
 		if (DEBUG)
 			debug_print_results(a, x, y, n); // Print results
