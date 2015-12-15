@@ -3,12 +3,13 @@
 #include <thread>
 #include <vector>
 #include <pthread.h>
+#include <iostream>
 
 using namespace std;
 
 // Serial Daxpy on a specific range, y[n] <- a * x[n] + y[n]
 void daxpy(size_t from, size_t to, double a, const double* x, double* y) {
-	for (size_t i = from; i < to; i++)
+	for (size_t i = from; i < to; ++i)
 		y[i] = a * x[i] + y[i];
 }
 
@@ -17,16 +18,22 @@ void daxpy(size_t from, size_t to, double a, const double* x, double* y) {
 void daxpy_parallel_exact_work(size_t n, double a, const double* x, double* y, size_t nt) {	
 	size_t work_size = n / nt; // Calculate the work size for each thread
 	
-	vector<thread> threads(nt); // Allocate a vector of threads
+	vector<thread*> threads(nt); // Allocate a vector of threads
+	
 	// Assign work to each thread and Start them
-	for (size_t i = 0; i < nt; i++) {
+	for (size_t i = 0; i < nt; ++i) {
 		size_t from = i * work_size; // Starting work index
 		size_t to = from + work_size; // Ending work index
-		threads[i] = thread(daxpy, from, to, a, x, y); // Run the thread
+		threads[i] = new thread(daxpy, ref(from), ref(to), ref(a), ref(x), ref(y)); // Run the threads using reference wrapper
 	}
 
-	for (thread& current_thread : threads) // Wait for all threads to finish
-		current_thread.join();
+	// Barrier
+	for (thread* current_thread : threads)
+		current_thread->join();
+	
+	// Cleanup
+	for (thread* current_thread : threads)
+		delete current_thread;
 }
 
 // DAXPY constant * a vector plus a vector.
@@ -58,14 +65,6 @@ void daxpy_parallel(size_t n, double a, const double* x, double* y, size_t nt) {
 	}	
 }
 
-struct thread_data {
-	size_t from;
-	size_t to;
-	double a;
-	const double* x;
-	double* y;
-};
-
 // Serial Daxpy for Pthreads on a specific range, y[n] <- a * x[n] + y[n]
 void *daxpy_pthreads(void* data_in) {
 
@@ -78,7 +77,7 @@ void *daxpy_pthreads(void* data_in) {
 	const double* in_x = data->x;
 	double* in_y = data->y;
 
-	for (size_t i = in_from; i < in_to; i++)
+	for (size_t i = in_from; i < in_to; ++i)
 		in_y[i] = in_a * in_x[i] + in_y[i];
 	
 	return nullptr;
@@ -90,40 +89,42 @@ void daxpy_parallel_exact_work_pthreads(size_t n, double a, const double* x, dou
 	void* status;
 	size_t work_size = n / nt; // Calculate the work size for each thread
 
-	pthread_t p_threads[DEFAULT_NUMBER_OF_THREADS];
+	pthread_t* p_threads = new pthread_t[nt];
 	pthread_attr_t attribute;
 
 	// Initialize and set thread detached attribute
 	pthread_attr_init(&attribute);
 	pthread_attr_setdetachstate(&attribute, PTHREAD_CREATE_JOINABLE);
 
-	for (size_t i = 0; i < nt; i++) {
-		struct thread_data td;
-		td.a = a;
-		td.x = x;
-		td.y = y;
+	struct thread_data td;
+	td.a = a;
+	td.x = x;
+	td.y = y;
+
+	for (size_t i = 0; i < nt; ++i) {
 		size_t from = i * work_size; // Starting work index
 		size_t to = from + work_size; // Ending work index
 		td.from = from;
 		td.to = to;
-		rc = pthread_create(&p_threads[i], &attribute, daxpy_pthreads, &td); // Run the thread
+		rc = pthread_create(&p_threads[i], &attribute, daxpy_pthreads, static_cast<void*>(&td)); // Run the thread
 		if (rc) {
-			printf("ERROR; return code from pthread_create() is %d\n", rc);
+			cout << "ERROR; return code from pthread_create() is " << rc << endl;
 				exit(-1);
 		}
 	}
 
 	// Free attribute and wait for the other threads
 	pthread_attr_destroy(&attribute);
-	for (size_t i = 0; i < nt; i++) {
+	for (size_t i = 0; i < nt; ++i) {
 		rc = pthread_join(p_threads[i], &status);
 		if (rc) {
-			printf("ERROR; return code from pthread_create() is %d\n", rc);
+			cout << "ERROR; return code from pthread_create() is " << rc << endl;
 				exit(-1);
 		}
 	}
 	
-	//pthread_exit(NULL);
+	// Cleanup
+	delete[] p_threads;
 }
 
 void daxpy_parallel_pthreads(size_t n, double a, const double* x, double* y, size_t nt) {

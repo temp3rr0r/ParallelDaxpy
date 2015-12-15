@@ -12,7 +12,7 @@ using namespace std::chrono;
 
 // Put data into the vector arrays
 void populate_vector_data(double* x, double* y, size_t n) {
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; ++i) {
 
 		x[i] = static_cast<double>(i);
 		y[i] = static_cast<double>(i) + DEFAULT_Y_ADDITION;
@@ -21,7 +21,7 @@ void populate_vector_data(double* x, double* y, size_t n) {
 
 // Print data
 void debug_print_vectors(double* x, double* y, size_t n) {	
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; ++i) {
 		cout << "x[" << i << "] = " << x[i];
 		cout << " y[" << i << "] = " << y[i] << endl;
 	}
@@ -29,14 +29,14 @@ void debug_print_vectors(double* x, double* y, size_t n) {
 
 // Print results
 void debug_print_results(double a, double* x, double* y, size_t n) {
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; ++i) {
 		cout << "y[" << i << "] = " << a << " * x[" << i << "] + y[" << i << "] = " << y[i] << endl;
 	}
 }
 
 // Assert results
 void assert_results(double a, double* x, double* y, size_t n) {
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; ++i) {
 		assert(a * x[i] + (x[i] + DEFAULT_Y_ADDITION) == y[i]);
 	}
 }
@@ -71,7 +71,7 @@ int main() {
 		daxpy_parallel(n, a, x, y, nt); // Calculate using C++ 11 threads
 		t2 = clock();
 		assert_results(a, x, y, n);
-		cout << "C++ 11 execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl << endl;
+		cout << "C++ 11 threads execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl << endl;
 
 		// Serial Execution
 		populate_vector_data(x, y, n);
