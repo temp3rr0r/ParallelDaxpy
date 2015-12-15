@@ -41,8 +41,7 @@ void assert_results(double a, double* x, double* y, size_t n) {
 	}
 }
 
-int main()
-{	
+int main() {	
 	int nt = DEFAULT_NUMBER_OF_THREADS; // number of threads	
 	double a = DEFAULT_PARAMETER_A; // constant parameter
 	size_t n = DEFAULT_VECTOR_SIZE; // Vector size
@@ -61,13 +60,18 @@ int main()
 		// Compare running serial, with pthreads and with c++11 threads
 		clock_t t1, t2;
 
+		// Print calculation info
+		cout << "=== Parallel Daxpy using C++ 11 threads, Pthreads and a serial version ===" << endl;
+		cout << "Number of threads: " << nt << endl;
+		cout << "Vector arrays size: " << n << endl << endl;
+
 		// C++ 11 threads
 		populate_vector_data(x, y, n);
 		t1 = clock();
 		daxpy_parallel(n, a, x, y, nt); // Calculate using C++ 11 threads
 		t2 = clock();
 		assert_results(a, x, y, n);
-		cout << "C++ 11 execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
+		cout << "C++ 11 execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl << endl;
 
 		// Serial Execution
 		populate_vector_data(x, y, n);
@@ -75,7 +79,7 @@ int main()
 		daxpy(0, n, a, x, y); // Calculate using serial execution
 		t2 = clock();
 		assert_results(a, x, y, n);
-		cout << "Serial execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
+		cout << "Serial execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl << endl;
 
 		// Pthreads
 		populate_vector_data(x, y, n);
@@ -83,10 +87,12 @@ int main()
 		daxpy_parallel_pthreads(n, a, x, y, nt); // Calculate using Pthreads
 		t2 = clock();
 		assert_results(a, x, y, n);
-		cout << "PThreads execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl;
+		cout << "PThreads execution: " << 1000 * (float(t2 - t1) / CLOCKS_PER_SEC) << " ms" << endl << endl;
 		
 		if (VERBOSE)
 			debug_print_results(a, x, y, n); // Print results
+
+		cout << "Done!" << endl;
 		
 		// Deallocate arrays
 		delete[] x;
